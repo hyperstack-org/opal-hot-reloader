@@ -91,6 +91,7 @@ def self.create_framework_aware_server(port, ping)
     #    Hyperloop::ClientDrivers.respond_to?(:initialize_client_drivers_on_boot)
     #   Hyperloop::ClientDrivers.initialize_client_drivers_on_boot
     # end
+    Hyperstack::Context.reset! false
     Hyperstack::Component.force_update!
   end
   @server.listen
