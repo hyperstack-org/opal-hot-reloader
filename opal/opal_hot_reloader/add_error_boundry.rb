@@ -6,7 +6,7 @@ class OpalHotReloader
     def self.included(base)
       base.after_error do |*err|
         @err = err
-        Hyperloop::Component.force_update!
+        Hyperstack::Component.force_update!
       end
       base.define_method :render do
         @err ? parse_display_and_clear_error : top_level_render
