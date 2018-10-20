@@ -1,4 +1,4 @@
-require 'opal_hot_reloader/reactrb_patches'
+require 'opal_hot_reloader/add_error_boundry'
 require 'opal_hot_reloader/css_reloader'
 require 'opal-parser' # gives me 'eval', for hot-loading code
 
@@ -29,7 +29,7 @@ class OpalHotReloader
   def self.alerts_on!
     @@USE_ALERT = true
   end
-  
+
   def self.alerts_off!
     @@USE_ALERT = false
   end
@@ -37,7 +37,7 @@ class OpalHotReloader
   def use_alert?
     @@USE_ALERT
   end
-  
+
   def reload(e)
     reload_request = JSON.parse(`e.data`)
     if reload_request[:type] == "ruby"
@@ -84,18 +84,14 @@ end
 # Automatically add in framework specific hooks
 
 def self.create_framework_aware_server(port, ping)
-  if defined? ::React
-    ReactrbPatches.patch!
-    @server = OpalHotReloader.new(port, ping) do
-      if defined?(Hyperloop) && 
-         defined?(Hyperloop::ClientDrivers) &&
-         Hyperloop::ClientDrivers.respond_to?(:initialize_client_drivers_on_boot)
-        Hyperloop::ClientDrivers.initialize_client_drivers_on_boot 
-      end
-      React::Component.force_update!
-    end 
-  else
-    @server = OpalHotReloader.new(port, ping)
+  ::Hyperstack::Internal::Component::TopLevelRailsComponent.include AddErrorBoundry
+  @server = OpalHotReloader.new(port, ping) do
+    # TODO: check this out when Operations are integrated
+    # if defined?(Hyperloop::Internal::Operation::ClientDrivers) &&
+    #    Hyperloop::ClientDrivers.respond_to?(:initialize_client_drivers_on_boot)
+    #   Hyperloop::ClientDrivers.initialize_client_drivers_on_boot
+    # end
+    Hyperstack::Component.force_update!
   end
   @server.listen
 end
