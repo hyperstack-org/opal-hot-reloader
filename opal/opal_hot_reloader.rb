@@ -43,6 +43,7 @@ class OpalHotReloader
     if reload_request[:type] == "ruby"
       puts "Reloading ruby #{reload_request[:filename]}"
       begin
+        Hyperstack::Context.reset! false
         $eval_proc.call reload_request[:source_code]
       rescue
         notify_error(reload_request)
@@ -91,7 +92,6 @@ def self.create_framework_aware_server(port, ping)
     #    Hyperloop::ClientDrivers.respond_to?(:initialize_client_drivers_on_boot)
     #   Hyperloop::ClientDrivers.initialize_client_drivers_on_boot
     # end
-    Hyperstack::Context.reset! false
     Hyperstack::Component.force_update!
   end
   @server.listen
